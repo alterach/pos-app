@@ -1,0 +1,51 @@
+/* POS Design System - CSS Variables */
+:root {
+  /* Colors */
+  --color-bg-main: #F5F7FA;
+  --color-bg-card: #FFFFFF;
+  --color-sidebar: #1F1D2B;
+  --color-sidebar-hover: #2D2B3A;
+  --color-accent: #6C5DD3;
+  --color-accent-light: rgba(108, 93, 211, 0.1);
+  --color-text-primary: #1F1D2B;
+  --color-text-secondary: #6E7191;
+  --color-text-light: #A0A3BD;
+  --color-text-inverse: #FFFFFF;
+  --color-success: #00C48C;
+  --color-warning: #FF9F43;
+  --color-border: #E4E6EB;
+
+  /* Typography */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 2rem;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* Layout */
+  --sidebar-width: 80px;
+  --header-height: 72px;
+}
