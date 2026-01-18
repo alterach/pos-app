@@ -7,7 +7,7 @@ import './POS.css';
 const categories = ['All', 'Coffee', 'Pastry', 'Drinks', 'Food', 'Dessert'];
 
 function POS() {
-  const { products } = useData();
+  const { products, addTransaction } = useData();
   const { cart, addItem, removeItem, updateQuantity, clearCart, totalPrice } = useCart();
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,8 +31,9 @@ function POS() {
       total: totalPrice,
       paymentMethod: method,
       customer: cart.customer,
+      date: new Date().toISOString(),
     };
-    useData.getState().addTransaction(transaction);
+    addTransaction(transaction);
     clearCart();
     setShowPayment(false);
     alert('Transaction completed successfully!');

@@ -16,6 +16,7 @@ import { DataProvider } from './context/DataContext';
 import POS from './pages/POS';
 import Products from './pages/Products';
 import Customers from './pages/Customers';
+import Reports from './pages/Reports';
 
 import './App.css';
 
@@ -105,6 +106,7 @@ function App() {
                 <Route path="/pos" element={<POS />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/customers" element={<Customers />} />
+                <Route path="/reports" element={<Reports />} />
               </Routes>
             </div>
           </div>
