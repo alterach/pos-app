@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
-import { ShoppingCart, DollarSign, Package, Users, BarChart3, Settings, LogOut, Home } from 'lucide-react';
+import { ShoppingCart, DollarSign, Package, Users, BarChart3, Settings as SettingsIcon, LogOut, Home } from 'lucide-react';
 import './styles/global.css';
 import './styles/layout.css';
 
@@ -17,6 +17,7 @@ import POS from './pages/POS';
 import Products from './pages/Products';
 import Customers from './pages/Customers';
 import Reports from './pages/Reports';
+import Settings from './pages/Settings';
 
 import './App.css';
 
@@ -26,6 +27,7 @@ const navItems = [
   { path: '/products', icon: Package, label: 'Products' },
   { path: '/customers', icon: Users, label: 'Customers' },
   { path: '/reports', icon: BarChart3, label: 'Reports' },
+  { path: '/settings', icon: SettingsIcon, label: 'Settings' },
 ];
 
 function Dashboard() {
@@ -90,9 +92,13 @@ function App() {
                 </nav>
               </div>
               <div className="sidebar-bottom">
-                <button className="nav-item" title="Settings">
-                  <Settings size={22} />
-                </button>
+                <NavLink
+                  to="/settings"
+                  className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                  title="Settings"
+                >
+                  <SettingsIcon size={22} />
+                </NavLink>
                 <button className="nav-item" title="Logout">
                   <LogOut size={22} />
                 </button>
@@ -107,6 +113,7 @@ function App() {
                 <Route path="/products" element={<Products />} />
                 <Route path="/customers" element={<Customers />} />
                 <Route path="/reports" element={<Reports />} />
+                <Route path="/settings" element={<Settings />} />
               </Routes>
             </div>
           </div>

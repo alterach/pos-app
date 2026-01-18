@@ -49,3 +49,15 @@
   --sidebar-width: 80px;
   --header-height: 72px;
 }
+
+[data-theme="dark"],
+html.dark {
+  --color-bg-main: #1F1D2B;
+  --color-bg-card: #2D2B3A;
+  --color-sidebar: #16151F;
+  --color-sidebar-hover: #1F1D2B;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #A0A3BD;
+  --color-text-light: #6E7191;
+  --color-border: #3A3A4A;
+}

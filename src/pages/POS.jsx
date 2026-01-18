@@ -1,17 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Plus, Minus, Trash2, CreditCard, DollarSign, X, User } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useData } from '../context/DataContext';
+import Receipt from '../components/Receipt';
 import './POS.css';
 
 const categories = ['All', 'Coffee', 'Pastry', 'Drinks', 'Food', 'Dessert'];
 
 function POS() {
-  const { products, addTransaction } = useData();
+  const { products, addTransaction, updateProductStock, settings } = useData();
   const { cart, addItem, removeItem, updateQuantity, clearCart, totalPrice } = useCart();
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [showPayment, setShowPayment] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [lastTransaction, setLastTransaction] = useState(null);
+  const [stockWarning, setStockWarning] = useState(null);
 
   const filteredProducts = products.filter(product => {
     const matchesCategory = activeCategory === 'All' || product.category === activeCategory;
@@ -26,18 +30,63 @@ function POS() {
   };
 
   const confirmPayment = (method) => {
+    const subtotal = cart.items.reduce((sum, item) => {
+      const price = typeof item.price === 'string' ? parseFloat(item.price.replace(/[Rp\s.]/g, '')) : item.price;
+      return sum + (price * item.quantity);
+    }, 0);
+
+    const taxRate = settings?.taxPercentage || 11;
+    const taxAmount = (subtotal * taxRate) / 100;
+    const total = subtotal + taxAmount;
+
     const transaction = {
       items: cart.items,
-      total: totalPrice,
+      subtotal,
+      tax: taxAmount,
+      taxRate,
+      total,
       paymentMethod: method,
       customer: cart.customer,
       date: new Date().toISOString(),
     };
-    addTransaction(transaction);
+
+    cart.items.forEach(item => {
+      updateProductStock(item.id, item.quantity);
+    });
+
+    const newTransaction = addTransaction(transaction);
+    setLastTransaction(newTransaction);
     clearCart();
     setShowPayment(false);
-    alert('Transaction completed successfully!');
+    setShowReceipt(true);
   };
+
+  const handleAddItem = (product) => {
+    const existingItem = cart.items.find(item => item.id === product.id);
+    const currentQty = existingItem ? existingItem.quantity : 0;
+    const newQty = currentQty + 1;
+
+    if (product.stock <= 0) {
+      setStockWarning(product.name);
+      setTimeout(() => setStockWarning(null), 2000);
+      return;
+    }
+
+    if (newQty > product.stock) {
+      setStockWarning(`${product.name} - Max stock: ${product.stock}`);
+      setTimeout(() => setStockWarning(null), 2000);
+      return;
+    }
+
+    addItem(product);
+  };
+
+  useEffect(() => {
+    if (stockWarning) {
+      const timer = setTimeout(() => setStockWarning(null), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [stockWarning]);
 
   return (
     <div className="pos-page">
@@ -66,17 +115,24 @@ function POS() {
         </div>
 
         <div className="pos-products-grid">
-          {filteredProducts.map(product => (
-            <button
-              key={product.id}
-              className="product-card"
-              onClick={() => addItem(product)}
-            >
-              <span className="product-emoji">{product.image}</span>
-              <span className="product-name">{product.name}</span>
-              <span className="product-price">{product.price}</span>
-            </button>
-          ))}
+          {filteredProducts.map(product => {
+            const isOutOfStock = product.stock <= 0;
+            const isLowStock = product.stock > 0 && product.stock < 5;
+            return (
+              <button
+                key={product.id}
+                className={`product-card ${isOutOfStock ? 'out-of-stock' : ''}`}
+                onClick={() => handleAddItem(product)}
+                disabled={isOutOfStock}
+              >
+                <span className="product-emoji">{product.image}</span>
+                <span className="product-name">{product.name}</span>
+                <span className="product-price">{product.price}</span>
+                {isLowStock && <span className="stock-badge low">Low: {product.stock}</span>}
+                {isOutOfStock && <span className="stock-badge out">Out of Stock</span>}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -174,6 +230,16 @@ function POS() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {showReceipt && lastTransaction && (
+        <Receipt transaction={lastTransaction} onClose={() => setShowReceipt(false)} />
+      )}
+
+      {stockWarning && (
+        <div className="stock-warning-toast">
+          {stockWarning}
         </div>
       )}
     </div>

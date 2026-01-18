@@ -22,6 +22,13 @@ const initialCustomers = [
 
 const initialTransactions = [];
 
+const defaultSettings = {
+  storeName: 'F. POS',
+  taxPercentage: 11,
+  currency: 'IDR',
+  darkMode: false,
+};
+
 function DataProvider({ children }) {
   const [products, setProducts] = useState(() => {
     const saved = localStorage.getItem('pos_products');
@@ -38,6 +45,11 @@ function DataProvider({ children }) {
     return saved ? JSON.parse(saved) : initialTransactions;
   });
 
+  const [settings, setSettings] = useState(() => {
+    const saved = localStorage.getItem('pos_settings');
+    return saved ? JSON.parse(saved) : defaultSettings;
+  });
+
   useEffect(() => {
     localStorage.setItem('pos_products', JSON.stringify(products));
   }, [products]);
@@ -49,6 +61,10 @@ function DataProvider({ children }) {
   useEffect(() => {
     localStorage.setItem('pos_transactions', JSON.stringify(transactions));
   }, [transactions]);
+
+  useEffect(() => {
+    localStorage.setItem('pos_settings', JSON.stringify(settings));
+  }, [settings]);
 
   const addProduct = (product) => {
     const newProduct = { ...product, id: Date.now() };
@@ -84,10 +100,20 @@ function DataProvider({ children }) {
     return newTransaction;
   };
 
+  const updateProductStock = (productId, quantity) => {
+    setProducts(products.map(p => {
+      if (p.id === productId) {
+        return { ...p, stock: Math.max(0, (p.stock || 0) - quantity) };
+      }
+      return p;
+    }));
+  };
+
   const value = {
     products,
     customers,
     transactions,
+    settings,
     addProduct,
     updateProduct,
     deleteProduct,
@@ -95,8 +121,10 @@ function DataProvider({ children }) {
     updateCustomer,
     deleteCustomer,
     addTransaction,
+    updateProductStock,
     setProducts,
     setCustomers,
+    setSettings,
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
