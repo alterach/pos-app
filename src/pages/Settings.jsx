@@ -1,29 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Store, Percent, DollarSign, Moon, Sun, Save } from 'lucide-react';
 import './Settings.css';
 
 function Settings() {
-  const [settings, setSettings] = useState({
+  const isDarkMode = localStorage.getItem('pos_darkMode') === 'true';
+
+  if (isDarkMode) {
+    document.documentElement.classList.add('dark');
+  }
+
+  const savedSettings = localStorage.getItem('pos_settings');
+  const initialSettings = savedSettings ? JSON.parse(savedSettings) : {
     storeName: 'F. POS',
     taxPercentage: 11,
     currency: 'IDR',
     darkMode: false,
+  };
+
+  const [settings, setSettings] = useState({
+    ...initialSettings,
+    darkMode: isDarkMode || initialSettings.darkMode
   });
 
   const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    const savedSettings = localStorage.getItem('pos_settings');
-    if (savedSettings) {
-      setSettings(JSON.parse(savedSettings));
-    }
-
-    const isDarkMode = localStorage.getItem('pos_darkMode') === 'true';
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      setSettings(prev => ({ ...prev, darkMode: true }));
-    }
-  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;

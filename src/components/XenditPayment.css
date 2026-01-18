@@ -1,0 +1,52 @@
+.xendit-btn {
+  background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+  color: white;
+}
+
+.xendit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0052cc 0%, #0044aa 100%);
+}
+
+.xendit-modal .xendit-pay-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 20px;
+  background: #0066ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.xendit-modal .xendit-pay-btn:hover {
+  background: #0052cc;
+}
+
+.payment-info {
+  text-align: center;
+  color: #64748b;
+  margin-bottom: 16px;
+}
+
+.payment-note {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 13px;
+  margin-top: 12px;
+}
+
+.payment-error {
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}

@@ -3,6 +3,7 @@ import { Search, Plus, Minus, Trash2, CreditCard, DollarSign, X, User } from 'lu
 import { useCart } from '../context/CartContext';
 import { useData } from '../context/DataContext';
 import Receipt from '../components/Receipt';
+import XenditPayment from '../components/XenditPayment';
 import './POS.css';
 
 const categories = ['All', 'Coffee', 'Pastry', 'Drinks', 'Food', 'Dessert'];
@@ -13,6 +14,7 @@ function POS() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [showPayment, setShowPayment] = useState(false);
+  const [showXenditPayment, setShowXenditPayment] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
   const [lastTransaction, setLastTransaction] = useState(null);
   const [stockWarning, setStockWarning] = useState(null);
@@ -27,6 +29,39 @@ function POS() {
 
   const handleCheckout = () => {
     setShowPayment(true);
+  };
+
+  const handleXenditSuccess = (paymentInfo) => {
+    const subtotal = cart.items.reduce((sum, item) => {
+      const price = typeof item.price === 'string' ? parseFloat(item.price.replace(/[Rp\s.]/g, '')) : item.price;
+      return sum + (price * item.quantity);
+    }, 0);
+
+    const taxRate = settings?.taxPercentage || 11;
+    const taxAmount = (subtotal * taxRate) / 100;
+    const total = subtotal + taxAmount;
+
+    const transaction = {
+      items: cart.items,
+      subtotal,
+      tax: taxAmount,
+      taxRate,
+      total,
+      paymentMethod: 'xendit',
+      paymentId: paymentInfo.paymentId,
+      customer: cart.customer,
+      date: new Date().toISOString(),
+    };
+
+    cart.items.forEach(item => {
+      updateProductStock(item.id, item.quantity);
+    });
+
+    const newTransaction = addTransaction(transaction);
+    setLastTransaction(newTransaction);
+    clearCart();
+    setShowXenditPayment(false);
+    setShowReceipt(true);
   };
 
   const confirmPayment = (method) => {
@@ -227,6 +262,19 @@ function POS() {
                   <CreditCard size={24} />
                   <span>Card</span>
                 </button>
+                <button
+                  className="payment-btn xendit-option"
+                  onClick={() => {
+                    setShowPayment(false);
+                    setShowXenditPayment(true);
+                  }}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <rect width="24" height="24" rx="4" fill="#0066FF"/>
+                    <path d="M7 12h10v1H7v-1zm0-3h10v1H7V9zm0 6h6v1H7v-1z" fill="white"/>
+                  </svg>
+                  <span>Xendit</span>
+                </button>
               </div>
             </div>
           </div>
@@ -235,6 +283,15 @@ function POS() {
 
       {showReceipt && lastTransaction && (
         <Receipt transaction={lastTransaction} onClose={() => setShowReceipt(false)} />
+      )}
+
+      {showXenditPayment && (
+        <XenditPayment
+          onClose={() => setShowXenditPayment(false)}
+          onSuccess={(paymentInfo) => {
+            handleXenditSuccess(paymentInfo);
+          }}
+        />
       )}
 
       {stockWarning && (

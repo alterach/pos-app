@@ -425,3 +425,20 @@
         z-index: 100;
     }
 }
+
+.payment-btn.xendit-option {
+    border-color: #0066FF;
+}
+
+.payment-btn.xendit-option:hover {
+    background: rgba(0, 102, 255, 0.1);
+}
+
+.payment-btn.xendit-option span {
+    color: #0066FF;
+}
+
+.payment-methods {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+

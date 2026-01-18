@@ -1,149 +1,137 @@
-# POS App - OpenCode Task List
+# POS App - OpenCode Tasks (Phase 2)
 
-## ✅ Completed Features
-- [x] Dashboard dengan stats cards
-- [x] POS page dengan cart & checkout
-- [x] Products page (CRUD)
-- [x] Customers page
-- [x] Reports page dengan charts
-- [x] CartContext (state management)
-- [x] DataContext (products, customers, transactions)
-- [x] LocalStorage persistence
-- [x] React Router navigation
+## ✅ Prerequisites Ready
+- Supabase project: READY
+- Xendit API keys: READY
+- .env file: CONFIGURED
 
 ---
 
-## 🔴 High Priority
+## 🚀 START HERE
 
-### 1. Settings Page
-```
-File: src/pages/Settings.jsx + Settings.css
-Route: /settings
-
-Features:
-- Store name (editable, saved to localStorage)
-- Tax percentage (PPN, default 11%)
-- Currency format (IDR)
-- Theme toggle (light/dark mode)
+### Task 1: Install Dependencies
+```bash
+cd C:\Users\10\POS
+npm install @supabase/supabase-js
 ```
 
-### 2. Print Receipt
+### Task 2: Create Supabase Client
 ```
-File: src/components/Receipt.jsx + Receipt.css
+File: src/lib/supabase.js
 
-Features:
-- Modal dengan preview struk
-- Tombol print (window.print atau react-to-print)
-- Format: nama toko, tanggal, items, subtotal, tax, total
-- Trigger setelah confirmPayment di POS.jsx
-```
+import { createClient } from '@supabase/supabase-js'
 
-### 3. Stock Tracking
-```
-File: Update DataContext.jsx + POS.jsx
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-Features:
-- Kurangi stock otomatis setelah checkout
-- Validasi stock sebelum add to cart
-- Warning "Out of Stock" jika stock = 0
-- Low stock indicator (< 5)
+export const supabase = createClient(supabaseUrl, supabaseKey)
 ```
 
----
+### Task 3: Create Database Schema
+Run this SQL in Supabase Dashboard → SQL Editor:
 
-## 🟡 Medium Priority
+```sql
+-- Products table
+CREATE TABLE products (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  category TEXT,
+  price INTEGER,
+  stock INTEGER DEFAULT 0,
+  image TEXT,
+  rating DECIMAL DEFAULT 0,
+  duration TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
 
-### 4. Export Reports
+-- Customers table
+CREATE TABLE customers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  email TEXT,
+  phone TEXT,
+  total_orders INTEGER DEFAULT 0,
+  total_spent INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Transactions table
+CREATE TABLE transactions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  items JSONB NOT NULL,
+  subtotal INTEGER,
+  tax INTEGER,
+  total INTEGER,
+  payment_method TEXT,
+  payment_status TEXT DEFAULT 'pending',
+  payment_id TEXT,
+  customer_id UUID REFERENCES customers(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Settings table
+CREATE TABLE settings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  store_name TEXT DEFAULT 'F. POS',
+  tax_percentage DECIMAL DEFAULT 11,
+  currency TEXT DEFAULT 'IDR',
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Seed initial products
+INSERT INTO products (name, category, price, stock, image, rating, duration) VALUES
+('Cappuccino', 'Coffee', 25000, 50, '☕', 4.9, '3-5min'),
+('Croissant', 'Pastry', 18000, 30, '🥐', 4.7, '2min'),
+('Matcha Latte', 'Drinks', 32000, 40, '🍵', 4.8, '4min'),
+('Club Sandwich', 'Food', 45000, 25, '🥪', 4.6, '8min'),
+('Cheesecake', 'Dessert', 35000, 20, '🍰', 4.9, '2min'),
+('Americano', 'Coffee', 20000, 45, '☕', 4.5, '3min'),
+('Croissant Chocolate', 'Pastry', 22000, 28, '🥐', 4.8, '2min'),
+('Iced Lemon Tea', 'Drinks', 28000, 35, '🍋', 4.4, '3min');
+
+-- Enable Row Level Security
+ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
+
+-- Create policies (allow all for now, tighten later)
+CREATE POLICY "Allow all" ON products FOR ALL USING (true);
+CREATE POLICY "Allow all" ON customers FOR ALL USING (true);
+CREATE POLICY "Allow all" ON transactions FOR ALL USING (true);
+CREATE POLICY "Allow all" ON settings FOR ALL USING (true);
 ```
-File: src/pages/Reports.jsx (update)
-Library: npm install jspdf html2canvas
 
-Features:
-- Export to CSV button
-- Export to PDF button
-- Date range filter
+### Task 4: Update DataContext to Use Supabase
+```
+File: src/context/DataContext.jsx
+
+- Replace useState with Supabase queries
+- Add useEffect to fetch data on mount
+- Update CRUD functions to use Supabase
+- Add loading states
 ```
 
-### 5. Search & Filter Enhancement
+### Task 5: Add Xendit Payment Integration
 ```
-Files: Products.jsx, Customers.jsx
+File: src/lib/xendit.js
+File: src/components/XenditPayment.jsx
 
-Features:
-- Advanced search dengan debounce
-- Sort by name/price/stock
-- Filter by category
-```
-
-### 6. Dashboard Dynamic Data
-```
-File: Update Dashboard in App.jsx
-
-Features:
-- Stats dari DataContext (real transactions)
-- Today's revenue
-- Active orders count
-- Top selling products chart
-```
-
----
-
-## 🟢 Nice to Have
-
-### 7. User Authentication
-```
-Files: src/context/AuthContext.jsx, src/pages/Login.jsx
-
-Features:
-- Simple login (username/password)
-- Role-based access (admin/cashier)
-- Protect routes
-```
-
-### 8. Dark Mode
-```
-Files: src/styles/variables.css, Settings.jsx
-
-Features:
-- CSS variables untuk dark theme
-- Toggle di Settings
-- Save preference ke localStorage
-```
-
-### 9. Keyboard Shortcuts
-```
-File: src/hooks/useKeyboardShortcuts.js
-
-Features:
-- F1: Dashboard
-- F2: POS
-- F3: Products
-- ESC: Close modal
-- Enter: Confirm checkout
-```
-
-### 10. Notification System
-```
-File: src/components/Toast.jsx
-
-Features:
-- Success/error/warning notifications
-- Auto dismiss
-- Replace alert() dengan Toast
+- Create invoice via Supabase Edge Function
+- Show payment link/QR
+- Handle payment callback
 ```
 
 ---
 
-## 📋 Quick Start Command
-
+## 📋 Dev Commands
 ```bash
 cd C:\Users\10\POS
 npm run dev
-# Open http://localhost:5173/
+# http://localhost:5173/
 ```
 
-## 📚 Reference Files
-- app_summary.md - Design specs
-- development_workflow.md - Development guide
-
-## 🔗 Repository
-https://github.com/alterach/pos-app
+## 🔗 Links
+- Supabase Dashboard: https://supabase.com/dashboard/project/qeznicytgvgkkdsykizj
+- Xendit Dashboard: https://dashboard.xendit.co
+- GitHub: https://github.com/alterach/pos-app
