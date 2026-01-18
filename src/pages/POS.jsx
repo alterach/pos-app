@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, Minus, Trash2, CreditCard, DollarSign, X, User } from 'lucide-react';
+import { Search, Plus, Minus, Trash2, CreditCard, DollarSign, X } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useData } from '../context/DataContext';
+import { parsePrice } from '../utils/price.js';
 import Receipt from '../components/Receipt';
 import XenditPayment from '../components/XenditPayment';
 import './POS.css';
@@ -19,6 +20,13 @@ function POS() {
   const [lastTransaction, setLastTransaction] = useState(null);
   const [stockWarning, setStockWarning] = useState(null);
 
+  const calculateSubtotal = (items) => {
+    return items.reduce((sum, item) => {
+      const price = parsePrice(item.price);
+      return sum + price * item.quantity;
+    }, 0);
+  };
+
   const filteredProducts = products.filter(product => {
     const matchesCategory = activeCategory === 'All' || product.category === activeCategory;
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -32,11 +40,7 @@ function POS() {
   };
 
   const handleXenditSuccess = (paymentInfo) => {
-    const subtotal = cart.items.reduce((sum, item) => {
-      const price = typeof item.price === 'string' ? parseFloat(item.price.replace(/[Rp\s.]/g, '')) : item.price;
-      return sum + (price * item.quantity);
-    }, 0);
-
+    const subtotal = calculateSubtotal(cart.items);
     const taxRate = settings?.taxPercentage || 11;
     const taxAmount = (subtotal * taxRate) / 100;
     const total = subtotal + taxAmount;
@@ -65,11 +69,7 @@ function POS() {
   };
 
   const confirmPayment = (method) => {
-    const subtotal = cart.items.reduce((sum, item) => {
-      const price = typeof item.price === 'string' ? parseFloat(item.price.replace(/[Rp\s.]/g, '')) : item.price;
-      return sum + (price * item.quantity);
-    }, 0);
-
+    const subtotal = calculateSubtotal(cart.items);
     const taxRate = settings?.taxPercentage || 11;
     const taxAmount = (subtotal * taxRate) / 100;
     const total = subtotal + taxAmount;

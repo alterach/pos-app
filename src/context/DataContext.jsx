@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { parsePrice, formatPrice, formatNumber } from '../utils/price.js';
 
 const DataContext = createContext();
 
@@ -38,12 +39,12 @@ function DataProvider({ children }) {
 
       if (error) throw error;
 
-      if (data && data.length > 0) {
-        setProducts(data.map(p => ({
-          ...p,
-          price: typeof p.price === 'number' ? `Rp ${p.price.toLocaleString('id-ID')}` : p.price
-        })));
-      } else {
+        if (data && data.length > 0) {
+          setProducts(data.map(p => ({
+            ...p,
+            price: formatPrice(p.price)
+          })));
+        } else {
         setProducts(initialProducts);
         await seedInitialProducts();
       }
@@ -59,7 +60,7 @@ function DataProvider({ children }) {
         .from('products')
         .insert(initialProducts.map(p => ({
           ...p,
-          price: typeof p.price === 'string' ? parsePrice(p.price) : p.price
+          price: parsePrice(p.price)
         })));
 
       if (error && error.code !== '23505') {
@@ -81,7 +82,7 @@ function DataProvider({ children }) {
 
       setCustomers(data.map(c => ({
         ...c,
-        totalSpent: `Rp ${(c.total_spent || 0).toLocaleString('id-ID')}`
+        totalSpent: formatNumber(c.total_spent || 0)
       })));
     } catch (err) {
       console.error('Error fetching customers:', err);
@@ -173,7 +174,7 @@ function DataProvider({ children }) {
 
     const newProduct = {
       ...data,
-      price: `Rp ${data.price.toLocaleString('id-ID')}`
+      price: formatPrice(data.price)
     };
     setProducts(prev => [newProduct, ...prev]);
     return newProduct;
@@ -206,7 +207,7 @@ function DataProvider({ children }) {
           ...p,
           ...updated,
           price: typeof newPrice === 'number'
-            ? `Rp ${newPrice.toLocaleString('id-ID')}`
+            ? formatPrice(newPrice)
             : newPrice
         };
       }
@@ -254,7 +255,7 @@ function DataProvider({ children }) {
 
     const newCustomer = {
       ...data,
-      totalSpent: 'Rp 0'
+      totalSpent: formatNumber(0)
     };
     setCustomers(prev => [newCustomer, ...prev]);
     return newCustomer;
@@ -375,11 +376,6 @@ function useData() {
     throw new Error('useData must be used within a DataProvider');
   }
   return context;
-}
-
-function parsePrice(priceStr) {
-  if (typeof priceStr === 'number') return priceStr;
-  return parseInt(priceStr.replace(/[^\d]/g, '')) || 0;
 }
 
 export { DataProvider, useData };

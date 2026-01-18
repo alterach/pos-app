@@ -1,4 +1,5 @@
-import { supabase } from './supabase'
+import { supabase } from './supabase.js';
+import { parsePrice } from '../utils/price.js';
 
 const XENDIT_SECRET_KEY = import.meta.env.VITE_XENDIT_SECRET_KEY || ''
 
@@ -65,11 +66,6 @@ export async function saveTransactionToSupabase(transaction) {
   }
 
   return data[0]
-}
-
-function parsePrice(priceStr) {
-  if (typeof priceStr === 'number') return priceStr
-  return parseInt(priceStr.replace(/[^\d]/g, '')) || 0
 }
 
 export { supabase }

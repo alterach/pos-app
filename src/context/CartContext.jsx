@@ -1,4 +1,6 @@
 import { createContext, useContext, useReducer, useEffect } from 'react';
+import { parsePrice } from '../utils/price.js';
+import { getFromStorage, setToStorage } from '../utils/storage.js';
 
 const CartContext = createContext();
 
@@ -47,14 +49,14 @@ function CartProvider({ children }) {
   const [state, dispatch] = useReducer(cartReducer, initialState);
 
   useEffect(() => {
-    const savedCart = localStorage.getItem('pos_cart');
+    const savedCart = getFromStorage('pos_cart');
     if (savedCart) {
-      dispatch({ type: 'LOAD_CART', payload: JSON.parse(savedCart) });
+      dispatch({ type: 'LOAD_CART', payload: savedCart });
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('pos_cart', JSON.stringify(state));
+    setToStorage('pos_cart', state);
   }, [state]);
 
   const addItem = (product) => dispatch({ type: 'ADD_ITEM', payload: product });
@@ -65,11 +67,7 @@ function CartProvider({ children }) {
   const clearCart = () => dispatch({ type: 'CLEAR_CART' });
 
   const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = state.items.reduce((sum, item) => sum + (parsePrice(item.price) * item.quantity), 0);
-
-  function parsePrice(priceStr) {
-    return parseInt(priceStr.replace(/[^\d]/g, '')) || 0;
-  }
+  const totalPrice = state.items.reduce((sum, item) => sum + parsePrice(item.price) * item.quantity, 0);
 
   const value = {
     cart: state,
