@@ -28,3 +28,7 @@ dist-ssr
 .env.local
 .env.production
 .env.development
+# Project metadata (not needed in repo)
+sanity-project.json
+uploaded_image*.png
+
